@@ -1,25 +1,51 @@
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
 plugins {
     java
-    id("org.springframework.boot") version "3.2.5"
-    id("io.spring.dependency-management") version "1.1.4"
+    id("org.springframework.boot") apply false
+    id("io.spring.dependency-management")
 }
-
-group = "kr.dogglezz"
-version = "0.0.1-SNAPSHOT"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.valueOf("VERSION_${property("javaVersion")}")
 }
 
-repositories {
-    mavenCentral()
+allprojects {
+    group = "${property("projectGroup")}"
+    version = "${property("projectVersion")}"
+
+    repositories {
+        mavenCentral()
+    }
 }
 
-dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-}
+subprojects {
+    apply {
+        plugin("java")
+        plugin("java-library")
+        plugin("org.springframework.boot")
+        plugin("io.spring.dependency-management")
+    }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+    dependencies {
+        testImplementation("org.springframework.boot:spring-boot-starter-test")
+    }
+
+    tasks.getByName<BootJar>("bootJar") {
+        enabled = false
+    }
+
+    tasks.getByName<Jar>("jar") {
+        enabled = true
+    }
+
+
+    java {
+        sourceCompatibility = JavaVersion.valueOf("VERSION_${property("javaVersion")}")
+    }
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
+
 }
